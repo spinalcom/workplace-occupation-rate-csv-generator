@@ -20,11 +20,13 @@ function generateTable1() {
                 const attr = yield (0, api_request_1.getWorkPlaceAttributAsync)(workplace.dynamicId);
                 const cp = yield (0, api_request_1.getNodeControlEndpointAsync)(workplace.dynamicId);
                 const ts = yield (0, api_request_1.getTimeSeriesAsync)(cp.dynamicId);
-                console.log("\tTIME SERIES LOADED ON WORKPLACE:", workplace.name, " | ", attr.attributs.value);
-                return (0, functions_1.parseSeries)(workplace.staticId, attr.attributs.value, ts);
+                console.log("\tTIME SERIES LOADED ON WORKPLACE:", workplace.name);
+                const table = (0, functions_1.parseSeries)(workplace.staticId, attr.attributs.value, ts);
+                console.log("\tDONE ON WORKPLACE:", workplace.name, "\n");
+                return table;
             }
             catch (e) {
-                nbErr++;
+                console.log("\tFAILED TO LOAD ON WORKPLACE:", workplace.name, "\n");
                 return [
                     {
                         "SpinalNode Id": workplace.staticId,
@@ -41,6 +43,7 @@ function generateTable1() {
 function Main() {
     return __awaiter(this, void 0, void 0, function* () {
         //cron.schedule("0 1 * * *", () => {
+        (0, api_request_1.updateDate)();
         generateTable1();
         //});
     });

@@ -65,7 +65,6 @@ export function parseSeries(
           100
       );
     });
-  console.log("\tDONE ON WORKPLACE:", workplaceCode);
 
   return dates.map((date, i) => ({
     "SpinalNode Id": workplaceId,

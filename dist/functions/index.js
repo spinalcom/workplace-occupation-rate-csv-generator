@@ -4,10 +4,6 @@ exports.parseSeries = exports.downloadCSV = void 0;
 const moment = require("moment");
 const fs_1 = require("fs");
 const path = require("path");
-const hier = moment(new Date().setMonth(9, 20)).subtract(1, "day");
-const dates = Array(24)
-    .fill(0)
-    .map((e, i) => moment(hier).hour(i).minutes(0).seconds(0).milliseconds(0).valueOf());
 function downloadCSV(data) {
     // creation d'un tableau de string contenant les infos (et séparateurs)
     const entete = Object.keys(data[0]);
@@ -32,6 +28,10 @@ function downloadCSV(data) {
 }
 exports.downloadCSV = downloadCSV;
 function parseSeries(workplaceId, workplaceCode, series) {
+    const hier = moment(new Date().setHours(0, 0, 0, 0)).subtract(1, "day");
+    const dates = Array(24)
+        .fill(0)
+        .map((e, i) => moment(hier).valueOf());
     const values = dates
         .map((date) => series.filter((s) => moment(s.date).isSame(date, "hour")))
         .map((val, i, array) => {
@@ -61,7 +61,6 @@ function parseSeries(workplaceId, workplaceCode, series) {
             quot) *
             100);
     });
-    console.log("\tDONE ON WORKPLACE:", workplaceCode);
     return dates.map((date, i) => ({
         "SpinalNode Id": workplaceId,
         "ID position de travail": workplaceCode,

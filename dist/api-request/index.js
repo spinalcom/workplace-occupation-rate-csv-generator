@@ -32,14 +32,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTimeSeriesAsync = exports.getNodeControlEndpointAsync = exports.getWorkPlaceAttributAsync = exports.getWorkPlacesAsync = void 0;
+exports.getTimeSeriesAsync = exports.getNodeControlEndpointAsync = exports.getWorkPlaceAttributAsync = exports.getWorkPlacesAsync = exports.updateDate = void 0;
 const config_1 = require("../config");
 const http_config_1 = require("./http-config");
 const moment = require("moment");
-const today = moment();
-today.hours(0);
-today.minutes(0);
-today.seconds(0);
+let today;
+function updateDate() {
+    today = moment();
+    today.hours(0);
+    today.minutes(0);
+    today.seconds(0);
+}
+exports.updateDate = updateDate;
 // Positions de travail
 function getWorkPlacesAsync() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -71,13 +75,8 @@ exports.getNodeControlEndpointAsync = getNodeControlEndpointAsync;
 // Time series
 function getTimeSeriesAsync(endpointId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const begin = moment(today).subtract(1, "year");
-        const result = yield http_config_1.HTTP.get(`/endpoint/${endpointId}/timeSeries/readCurrentYear`);
-        /*await HTTP.get(
-          `/endpoint/${endpointId}/timeSeries/read/${begin.format(
-            "DD-MM-YYYY HH:mm:ss"
-          )}/${today.format("DD-MM-YYYY HH:mm:ss")}`
-        );*/
+        const begin = moment(today).subtract(1, "day");
+        const result = yield http_config_1.HTTP.get(`/endpoint/${endpointId}/timeSeries/read/${begin.format("DD-MM-YYYY HH:mm:ss")}/${today.format("DD-MM-YYYY HH:mm:ss")}`);
         return result.data;
     });
 }

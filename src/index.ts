@@ -5,10 +5,10 @@ import {
   getTimeSeriesAsync,
   getWorkPlaceAttributAsync,
   getWorkPlacesAsync,
+  updateDate,
 } from "./api-request";
 
-async function generateTable1() {
-  let nbErr = 0;
+async function generateTable2() {
   const workplaces = await getWorkPlacesAsync();
   const table = await Promise.all(
     workplaces.map(async (workplace: any) => {
@@ -16,15 +16,12 @@ async function generateTable1() {
         const attr = await getWorkPlaceAttributAsync(workplace.dynamicId);
         const cp = await getNodeControlEndpointAsync(workplace.dynamicId);
         const ts = await getTimeSeriesAsync(cp.dynamicId);
-        console.log(
-          "\tTIME SERIES LOADED ON WORKPLACE:",
-          workplace.name,
-          " | ",
-          attr.attributs.value
-        );
-        return parseSeries(workplace.staticId, attr.attributs.value, ts);
+        console.log("\tTIME SERIES LOADED ON WORKPLACE:", workplace.name);
+        const table = parseSeries(workplace.staticId, attr.attributs.value, ts);
+        console.log("\tDONE ON WORKPLACE:", workplace.name, "\n");
+        return table;
       } catch (e) {
-        nbErr++;
+        console.log("\tFAILED TO LOAD ON WORKPLACE:", workplace.name, "\n");
         return [
           {
             "SpinalNode Id": workplace.staticId,
@@ -41,9 +38,10 @@ async function generateTable1() {
 }
 
 async function Main() {
-  //cron.schedule("0 1 * * *", () => {
-  generateTable1();
-  //});
+  cron.schedule("0 1 * * *", () => {
+    updateDate();
+    generateTable2();
+  });
 }
 
 Main();

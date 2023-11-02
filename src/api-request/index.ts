@@ -26,10 +26,14 @@ import config from "../config";
 import { HTTP } from "./http-config";
 import * as moment from "moment";
 
-const today = moment();
-today.hours(0);
-today.minutes(0);
-today.seconds(0);
+let today;
+
+export function updateDate() {
+  today = moment();
+  today.hours(0);
+  today.minutes(0);
+  today.seconds(0);
+}
 
 // Positions de travail
 export async function getWorkPlacesAsync() {
@@ -73,15 +77,12 @@ export async function getNodeControlEndpointAsync(nodeId: number) {
 
 // Time series
 export async function getTimeSeriesAsync(endpointId: number) {
-  const begin = moment(today).subtract(1, "year");
+  const begin = moment(today).subtract(1, "day");
 
   const result = await HTTP.get(
-    `/endpoint/${endpointId}/timeSeries/readCurrentYear`
-  );
-  /*await HTTP.get(
     `/endpoint/${endpointId}/timeSeries/read/${begin.format(
       "DD-MM-YYYY HH:mm:ss"
     )}/${today.format("DD-MM-YYYY HH:mm:ss")}`
-  );*/
+  );
   return result.data;
 }
