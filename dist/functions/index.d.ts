@@ -6,7 +6,7 @@ export declare function parseSeries(workplaceId: string, workplaceCode: string, 
     valeur: number;
 }[];
 export declare function getWorkPlaces(): Promise<any>;
-export declare function getStaticWorkplace(): Promise<void>;
+export declare function getStaticWorkplace(): Promise<any[]>;
 export declare function getWorkPlacesFromServices(): Promise<any>;
 export declare function getWorkPlacesFromAreas(): Promise<any>;
 export declare function mergeWorkplaces(src: any[], to_merge: any[]): any[];

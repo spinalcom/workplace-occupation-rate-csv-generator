@@ -2,6 +2,7 @@ import * as cron from "node-cron";
 import config from "./config";
 import {
   downloadCSV,
+  getStaticWorkplace,
   getWorkPlaces,
   getWorkPlacesFromAreas,
   getWorkPlacesFromServices,
@@ -17,7 +18,7 @@ import {
 
 async function generateTable1() {
   console.log("Generating static table");
-  const workplaces = await getWorkPlaces();
+  const workplaces = await getStaticWorkplace();
   console.log("\tLoaded from captor group");
   const serviceWorkplaces = await getWorkPlacesFromServices();
   console.log("\tLoaded from service group");

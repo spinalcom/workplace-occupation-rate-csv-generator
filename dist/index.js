@@ -16,7 +16,7 @@ const api_request_1 = require("./api-request");
 function generateTable1() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Generating static table");
-        const workplaces = yield (0, functions_1.getWorkPlaces)();
+        const workplaces = yield (0, functions_1.getStaticWorkplace)();
         console.log("\tLoaded from captor group");
         const serviceWorkplaces = yield (0, functions_1.getWorkPlacesFromServices)();
         console.log("\tLoaded from service group");

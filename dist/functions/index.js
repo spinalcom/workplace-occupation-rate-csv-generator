@@ -92,17 +92,46 @@ exports.getWorkPlaces = getWorkPlaces;
 function getStaticWorkplace() {
     return __awaiter(this, void 0, void 0, function* () {
         const workplaces = yield getWorkPlaces();
-        yield Promise.all(workplaces.map((workplace) => __awaiter(this, void 0, void 0, function* () {
-            const workplacePosition = (yield (0, api_request_1.getWorkPlaceAttributAsync)(workplace.dynamicId))
-                .find((a) => a.name === config_1.default.attribute.category)
-                .attributs.find((a) => a.label === config_1.default.attribute.name);
-            const workplaceFloor = (yield (0, api_request_1.getPositionAsync)(workplace.dynamicId)).info
-                .floor.name;
-            return {
-                "SpinalNode Id": workplace.staticId,
-                "ID position de travail": workplacePosition.value,
-                Étage: workplaceFloor,
-            };
+        return yield Promise.all(workplaces.map((workplace) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const workplacePosition = (yield (0, api_request_1.getWorkPlaceAttributAsync)(workplace.dynamicId))
+                    .find((a) => a.name === config_1.default.attribute.category)
+                    .attributs.find((a) => a.label === config_1.default.attribute.name);
+                try {
+                    const workplaceFloor = (yield (0, api_request_1.getPositionAsync)(workplace.dynamicId))
+                        .info.floor.name;
+                    return {
+                        "SpinalNode Id": workplace.staticId,
+                        "ID position de travail": workplacePosition.value,
+                        Étage: workplaceFloor,
+                    };
+                }
+                catch (_a) {
+                    return {
+                        "SpinalNode Id": workplace.staticId,
+                        "ID position de travail": workplacePosition.value,
+                        Étage: undefined,
+                    };
+                }
+            }
+            catch (_b) {
+                try {
+                    const workplaceFloor = (yield (0, api_request_1.getPositionAsync)(workplace.dynamicId))
+                        .info.floor.name;
+                    return {
+                        "SpinalNode Id": workplace.staticId,
+                        "ID position de travail": undefined,
+                        Étage: workplaceFloor,
+                    };
+                }
+                catch (_c) {
+                    return {
+                        "SpinalNode Id": workplace.staticId,
+                        "ID position de travail": undefined,
+                        Étage: undefined,
+                    };
+                }
+            }
         })));
     });
 }

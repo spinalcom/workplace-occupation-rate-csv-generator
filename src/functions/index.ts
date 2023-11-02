@@ -104,20 +104,46 @@ export async function getWorkPlaces() {
 
 export async function getStaticWorkplace() {
   const workplaces = await getWorkPlaces();
-  await Promise.all(
+  return await Promise.all(
     workplaces.map(async (workplace) => {
-      const workplacePosition = (
-        await getWorkPlaceAttributAsync(workplace.dynamicId)
-      )
-        .find((a: any) => a.name === config.attribute.category)
-        .attributs.find((a: any) => a.label === config.attribute.name);
-      const workplaceFloor = (await getPositionAsync(workplace.dynamicId)).info
-        .floor.name;
-      return {
-        "SpinalNode Id": workplace.staticId,
-        "ID position de travail": workplacePosition.value,
-        Étage: workplaceFloor,
-      };
+      try {
+        const workplacePosition = (
+          await getWorkPlaceAttributAsync(workplace.dynamicId)
+        )
+          .find((a: any) => a.name === config.attribute.category)
+          .attributs.find((a: any) => a.label === config.attribute.name);
+        try {
+          const workplaceFloor = (await getPositionAsync(workplace.dynamicId))
+            .info.floor.name;
+          return {
+            "SpinalNode Id": workplace.staticId,
+            "ID position de travail": workplacePosition.value,
+            Étage: workplaceFloor,
+          };
+        } catch {
+          return {
+            "SpinalNode Id": workplace.staticId,
+            "ID position de travail": workplacePosition.value,
+            Étage: undefined,
+          };
+        }
+      } catch {
+        try {
+          const workplaceFloor = (await getPositionAsync(workplace.dynamicId))
+            .info.floor.name;
+          return {
+            "SpinalNode Id": workplace.staticId,
+            "ID position de travail": undefined,
+            Étage: workplaceFloor,
+          };
+        } catch {
+          return {
+            "SpinalNode Id": workplace.staticId,
+            "ID position de travail": undefined,
+            Étage: undefined,
+          };
+        }
+      }
     })
   );
 }
