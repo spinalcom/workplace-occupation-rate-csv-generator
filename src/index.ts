@@ -41,20 +41,37 @@ async function generateTable2() {
         const attr = (await getWorkPlaceAttributAsync(workplace.dynamicId))
           .find((a: any) => a.name === config.attribute.category)
           .attributs.find((a: any) => a.label === config.attribute.name);
-        const cp = await getNodeControlEndpointAsync(workplace.dynamicId);
-        const ts = await getTimeSeriesAsync(cp.dynamicId);
-        const table = parseSeries(workplace.staticId, attr.value, ts);
-        return table;
-      } catch (e) {
-        nbErr++;
-        return [
-          {
-            "SpinalNode Id": workplace.staticId,
-            "ID position de travail": undefined,
-            Timestamp: undefined,
-            valeur: undefined,
-          },
-        ];
+        try {
+          const cp = await getNodeControlEndpointAsync(workplace.dynamicId);
+          const ts = await getTimeSeriesAsync(cp.dynamicId);
+          const table = parseSeries(workplace.staticId, ts, attr.value);
+          return table;
+        } catch {
+          return [
+            {
+              "SpinalNode Id": workplace.staticId,
+              "ID position de travail": attr.value,
+              Timestamp: undefined,
+              valeur: undefined,
+            },
+          ];
+        }
+      } catch {
+        try {
+          const cp = await getNodeControlEndpointAsync(workplace.dynamicId);
+          const ts = await getTimeSeriesAsync(cp.dynamicId);
+          const table = parseSeries(workplace.staticId, ts);
+          return table;
+        } catch {
+          return [
+            {
+              "SpinalNode Id": workplace.staticId,
+              "ID position de travail": undefined,
+              Timestamp: undefined,
+              valeur: undefined,
+            },
+          ];
+        }
       }
     })
   );
@@ -63,7 +80,6 @@ async function generateTable2() {
     config.table.dynamic,
     table.reduce((e1, e2) => [...e1, ...e2], [])
   );
-  console.log(nbErr, "errors");
 }
 
 async function Main() {

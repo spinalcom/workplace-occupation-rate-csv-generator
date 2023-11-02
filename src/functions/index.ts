@@ -36,8 +36,8 @@ export function downloadCSV(prefixTable: string, data: any[]) {
 
 export function parseSeries(
   workplaceId: string,
-  workplaceCode: string,
-  series: any[]
+  series: any[],
+  workplaceCode?: string
 ) {
   const hier = moment(new Date().setHours(0, 0, 0, 0)).subtract(1, "day");
   const dates = Array(24)
@@ -180,7 +180,7 @@ export async function getWorkPlacesFromServices() {
           .filter((p: any) => p.name.startsWith(config.position.equipement))
           .map((wp) => ({
             "SpinalNode Id": wp.staticId,
-            //"Service category": group.category.name,
+            //"Service": group.category.name,
             Direction: group.name,
           }))
       )
@@ -230,7 +230,9 @@ export async function getWorkPlacesFromAreas() {
 
 export function mergeWorkplaces(src: any[], to_merge: any[]) {
   return src.map((wp) => {
-    const found = to_merge.find((tm) => tm.staticId === wp.staticId);
+    const found = to_merge.find(
+      (tm) => tm["SpinalNode Id"] === wp["SpinalNode Id"]
+    );
     return { ...wp, ...found };
   });
 }

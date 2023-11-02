@@ -1,5 +1,5 @@
 export declare function downloadCSV(prefixTable: string, data: any[]): void;
-export declare function parseSeries(workplaceId: string, workplaceCode: string, series: any[]): {
+export declare function parseSeries(workplaceId: string, series: any[], workplaceCode?: string): {
     "SpinalNode Id": string;
     "ID position de travail": string;
     Timestamp: number;

@@ -36,25 +36,43 @@ function generateTable2() {
                 const attr = (yield (0, api_request_1.getWorkPlaceAttributAsync)(workplace.dynamicId))
                     .find((a) => a.name === config_1.default.attribute.category)
                     .attributs.find((a) => a.label === config_1.default.attribute.name);
-                const cp = yield (0, api_request_1.getNodeControlEndpointAsync)(workplace.dynamicId);
-                const ts = yield (0, api_request_1.getTimeSeriesAsync)(cp.dynamicId);
-                const table = (0, functions_1.parseSeries)(workplace.staticId, attr.value, ts);
-                return table;
+                try {
+                    const cp = yield (0, api_request_1.getNodeControlEndpointAsync)(workplace.dynamicId);
+                    const ts = yield (0, api_request_1.getTimeSeriesAsync)(cp.dynamicId);
+                    const table = (0, functions_1.parseSeries)(workplace.staticId, ts, attr.value);
+                    return table;
+                }
+                catch (_a) {
+                    return [
+                        {
+                            "SpinalNode Id": workplace.staticId,
+                            "ID position de travail": attr.value,
+                            Timestamp: undefined,
+                            valeur: undefined,
+                        },
+                    ];
+                }
             }
-            catch (e) {
-                nbErr++;
-                return [
-                    {
-                        "SpinalNode Id": workplace.staticId,
-                        "ID position de travail": undefined,
-                        Timestamp: undefined,
-                        valeur: undefined,
-                    },
-                ];
+            catch (_b) {
+                try {
+                    const cp = yield (0, api_request_1.getNodeControlEndpointAsync)(workplace.dynamicId);
+                    const ts = yield (0, api_request_1.getTimeSeriesAsync)(cp.dynamicId);
+                    const table = (0, functions_1.parseSeries)(workplace.staticId, ts);
+                    return table;
+                }
+                catch (_c) {
+                    return [
+                        {
+                            "SpinalNode Id": workplace.staticId,
+                            "ID position de travail": undefined,
+                            Timestamp: undefined,
+                            valeur: undefined,
+                        },
+                    ];
+                }
             }
         })));
         (0, functions_1.downloadCSV)(config_1.default.table.dynamic, table.reduce((e1, e2) => [...e1, ...e2], []));
-        console.log(nbErr, "errors");
     });
 }
 function Main() {

@@ -38,7 +38,7 @@ function downloadCSV(prefixTable, data) {
     });
 }
 exports.downloadCSV = downloadCSV;
-function parseSeries(workplaceId, workplaceCode, series) {
+function parseSeries(workplaceId, series, workplaceCode) {
     const hier = moment(new Date().setHours(0, 0, 0, 0)).subtract(1, "day");
     const dates = Array(24)
         .fill(0)
@@ -150,7 +150,7 @@ function getWorkPlacesFromServices() {
                 .filter((p) => p.name.startsWith(config_1.default.position.equipement))
                 .map((wp) => ({
                 "SpinalNode Id": wp.staticId,
-                //"Service category": group.category.name,
+                //"Service": group.category.name,
                 Direction: group.name,
             }));
         }))))
@@ -181,7 +181,7 @@ function getWorkPlacesFromAreas() {
 exports.getWorkPlacesFromAreas = getWorkPlacesFromAreas;
 function mergeWorkplaces(src, to_merge) {
     return src.map((wp) => {
-        const found = to_merge.find((tm) => tm.staticId === wp.staticId);
+        const found = to_merge.find((tm) => tm["SpinalNode Id"] === wp["SpinalNode Id"]);
         return Object.assign(Object.assign({}, wp), found);
     });
 }
