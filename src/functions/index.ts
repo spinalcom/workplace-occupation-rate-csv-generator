@@ -1,8 +1,17 @@
 import * as moment from "moment";
-import { writeFile } from "fs";
 import * as path from "path";
+import { writeFile } from "fs";
+import config from "../config";
+import {
+  getEquipementCategoriesAsync,
+  getEquipementContextesAsync,
+  getEquipementGroupsAsync,
+  getEquipementWorplacesAsync,
+  getPositionAsync,
+  getWorkPlaceAttributAsync,
+} from "../api-request";
 
-export function downloadCSV(data) {
+export function downloadCSV(prefixTable: string, data: any[]) {
   // creation d'un tableau de string contenant les infos (et séparateurs)
   const entete = Object.keys(data[0]);
   let tableur = [];
@@ -15,7 +24,7 @@ export function downloadCSV(data) {
     tableur.push("\n");
   });
 
-  const fileName = `${process.env.PREFIX_TABLE_2}${moment()
+  const fileName = `${prefixTable}${moment()
     .subtract(1, "day")
     .format("DDMMYY")}.csv`;
 
@@ -72,4 +81,130 @@ export function parseSeries(
     Timestamp: date,
     valeur: values[i],
   }));
+}
+
+export async function getWorkPlaces() {
+  const context = (await getEquipementContextesAsync()).find(
+    (c: any) => c.name === config.position.context
+  );
+  const category = (await getEquipementCategoriesAsync(context.dynamicId)).find(
+    (c: any) => c.name === config.position.category
+  );
+  const group = (
+    await getEquipementGroupsAsync(context.dynamicId, category.dynamicId)
+  ).find((g: any) => g.name === config.position.group);
+  return (
+    await getEquipementWorplacesAsync(
+      context.dynamicId,
+      category.dynamicId,
+      group.dynamicId
+    )
+  ).filter((p: any) => p.name.startsWith(config.position.equipement));
+}
+
+export async function getStaticWorkplace() {
+  const workplaces = await getWorkPlaces();
+  await Promise.all(
+    workplaces.map(async (workplace) => {
+      const workplacePosition = (
+        await getWorkPlaceAttributAsync(workplace.dynamicId)
+      )
+        .find((a: any) => a.name === config.attribute.category)
+        .attributs.find((a: any) => a.label === config.attribute.name);
+      const workplaceFloor = (await getPositionAsync(workplace.dynamicId)).info
+        .floor.name;
+      return {
+        "SpinalNode Id": workplace.staticId,
+        "ID position de travail": workplacePosition.value,
+        Étage: workplaceFloor,
+      };
+    })
+  );
+}
+
+export async function getWorkPlacesFromServices() {
+  const context = (await getEquipementContextesAsync()).find(
+    (c: any) => c.name === config.service.context
+  );
+
+  const categories = await getEquipementCategoriesAsync(context.dynamicId);
+
+  const groups = (
+    await Promise.all(
+      categories.map(async (category) =>
+        (
+          await getEquipementGroupsAsync(context.dynamicId, category.dynamicId)
+        ).map((g) => ({ category: { ...category }, ...g }))
+      )
+    )
+  )
+    .filter((g) => g)
+    .reduce((g1, g2) => [...g1, ...g2], []);
+
+  const workplaces = (
+    await Promise.all(
+      groups.map(async (group) =>
+        (
+          await getEquipementWorplacesAsync(
+            context.dynamicId,
+            group.category.dynamicId,
+            group.dynamicId
+          )
+        )
+          .filter((p: any) => p.name.startsWith(config.position.equipement))
+          .map((wp) => ({
+            "SpinalNode Id": wp.staticId,
+            //"Service category": group.category.name,
+            Direction: group.name,
+          }))
+      )
+    )
+  )
+    .filter((wp) => wp)
+    .reduce((wp1, wp2) => [...wp1, ...wp2], []);
+  return workplaces;
+}
+
+export async function getWorkPlacesFromAreas() {
+  const context = (await getEquipementContextesAsync()).find(
+    (c: any) => c.name === config.quartier.context
+  );
+
+  const category = (await getEquipementCategoriesAsync(context.dynamicId)).find(
+    (c) => c.name === config.quartier.category
+  );
+
+  const groups = await getEquipementGroupsAsync(
+    context.dynamicId,
+    category.dynamicId
+  );
+
+  const workplaces = (
+    await Promise.all(
+      groups.map(async (group) =>
+        (
+          await getEquipementWorplacesAsync(
+            context.dynamicId,
+            category.dynamicId,
+            group.dynamicId
+          )
+        )
+          .filter((p: any) => p.name.startsWith(config.position.equipement))
+          .map((wp) => ({
+            "SpinalNode Id": wp.staticId,
+            Quartier: group.name,
+          }))
+      )
+    )
+  )
+    .filter((wp) => wp)
+    .reduce((wp1, wp2) => [...wp1, ...wp2], []);
+  return workplaces;
+}
+
+export function mergeWorkplaces(src: any[], to_merge: any[]) {
+  return src.map((wp) => {
+    const found = to_merge.find((tm) => tm.staticId === wp.staticId);
+    return { ...wp, ...found };
+  });
 }

@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTimeSeriesAsync = exports.getNodeControlEndpointAsync = exports.getWorkPlaceAttributAsync = exports.getWorkPlacesAsync = exports.updateDate = void 0;
+exports.getTimeSeriesAsync = exports.getNodeControlEndpointAsync = exports.getWorkPlaceAttributAsync = exports.getPositionAsync = exports.getEquipementWorplacesAsync = exports.getEquipementGroupsAsync = exports.getEquipementCategoriesAsync = exports.getEquipementContextesAsync = exports.updateDate = void 0;
 const config_1 = require("../config");
 const http_config_1 = require("./http-config");
 const moment = require("moment");
@@ -45,21 +45,40 @@ function updateDate() {
 }
 exports.updateDate = updateDate;
 // Positions de travail
-function getWorkPlacesAsync() {
+function getEquipementContextesAsync() {
     return __awaiter(this, void 0, void 0, function* () {
-        const context = (yield http_config_1.HTTP.get(`/equipementsGroup/list`)).data.find((c) => c.name === config_1.default.position.context);
-        const category = (yield http_config_1.HTTP.get(`/equipementsGroup/${context.dynamicId}/category_list`)).data.find((c) => c.name === config_1.default.position.category);
-        const group = (yield http_config_1.HTTP.get(`/equipementsGroup/${context.dynamicId}/category/${category.dynamicId}/group_list`)).data.find((g) => g.name === config_1.default.position.group);
-        return (yield http_config_1.HTTP.get(`/equipementsGroup/${context.dynamicId}/category/${category.dynamicId}/group/${group.dynamicId}/equipementList`)).data.filter((p) => p.name.startsWith(config_1.default.position.equipement));
+        return (yield http_config_1.HTTP.get(`/equipementsGroup/list`)).data;
     });
 }
-exports.getWorkPlacesAsync = getWorkPlacesAsync;
+exports.getEquipementContextesAsync = getEquipementContextesAsync;
+function getEquipementCategoriesAsync(contextId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return (yield http_config_1.HTTP.get(`/equipementsGroup/${contextId}/category_list`)).data;
+    });
+}
+exports.getEquipementCategoriesAsync = getEquipementCategoriesAsync;
+function getEquipementGroupsAsync(contextId, categoryId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return (yield http_config_1.HTTP.get(`/equipementsGroup/${contextId}/category/${categoryId}/group_list`)).data;
+    });
+}
+exports.getEquipementGroupsAsync = getEquipementGroupsAsync;
+function getEquipementWorplacesAsync(contextId, categoryId, groupId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return (yield http_config_1.HTTP.get(`/equipementsGroup/${contextId}/category/${categoryId}/group/${groupId}/equipementList`)).data;
+    });
+}
+exports.getEquipementWorplacesAsync = getEquipementWorplacesAsync;
+function getPositionAsync(equipementId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return (yield http_config_1.HTTP.get(`/equipement/${equipementId}/get_postion`)).data;
+    });
+}
+exports.getPositionAsync = getPositionAsync;
 // Attributs
 function getWorkPlaceAttributAsync(workplaceId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const category_attribut = (yield http_config_1.HTTP.get(`/node/${workplaceId}/attributsList`)).data.find((a) => a.name === config_1.default.attribute.category);
-        category_attribut.attributs = category_attribut.attributs.find((a) => a.label === config_1.default.attribute.name);
-        return category_attribut;
+        return (yield http_config_1.HTTP.get(`/node/${workplaceId}/attributsList`)).data;
     });
 }
 exports.getWorkPlaceAttributAsync = getWorkPlaceAttributAsync;

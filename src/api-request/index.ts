@@ -36,34 +36,44 @@ export function updateDate() {
 }
 
 // Positions de travail
-export async function getWorkPlacesAsync() {
-  const context = (await HTTP.get(`/equipementsGroup/list`)).data.find(
-    (c: any) => c.name === config.position.context
-  );
-  const category = (
-    await HTTP.get(`/equipementsGroup/${context.dynamicId}/category_list`)
-  ).data.find((c: any) => c.name === config.position.category);
-  const group = (
-    await HTTP.get(
-      `/equipementsGroup/${context.dynamicId}/category/${category.dynamicId}/group_list`
-    )
-  ).data.find((g: any) => g.name === config.position.group);
+export async function getEquipementContextesAsync() {
+  return (await HTTP.get(`/equipementsGroup/list`)).data;
+}
+
+export async function getEquipementCategoriesAsync(contextId: number) {
+  return (await HTTP.get(`/equipementsGroup/${contextId}/category_list`)).data;
+}
+
+export async function getEquipementGroupsAsync(
+  contextId: number,
+  categoryId: number
+) {
   return (
     await HTTP.get(
-      `/equipementsGroup/${context.dynamicId}/category/${category.dynamicId}/group/${group.dynamicId}/equipementList`
+      `/equipementsGroup/${contextId}/category/${categoryId}/group_list`
     )
-  ).data.filter((p: any) => p.name.startsWith(config.position.equipement));
+  ).data;
+}
+
+export async function getEquipementWorplacesAsync(
+  contextId: number,
+  categoryId: number,
+  groupId: number
+) {
+  return (
+    await HTTP.get(
+      `/equipementsGroup/${contextId}/category/${categoryId}/group/${groupId}/equipementList`
+    )
+  ).data;
+}
+
+export async function getPositionAsync(equipementId: number) {
+  return (await HTTP.get(`/equipement/${equipementId}/get_postion`)).data;
 }
 
 // Attributs
 export async function getWorkPlaceAttributAsync(workplaceId: number) {
-  const category_attribut = (
-    await HTTP.get(`/node/${workplaceId}/attributsList`)
-  ).data.find((a: any) => a.name === config.attribute.category);
-  category_attribut.attributs = category_attribut.attributs.find(
-    (a: any) => a.label === config.attribute.name
-  );
-  return category_attribut;
+  return (await HTTP.get(`/node/${workplaceId}/attributsList`)).data;
 }
 
 // Points de contrôle

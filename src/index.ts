@@ -1,27 +1,51 @@
 import * as cron from "node-cron";
-import { downloadCSV, parseSeries } from "./functions";
+import config from "./config";
+import {
+  downloadCSV,
+  getWorkPlaces,
+  getWorkPlacesFromAreas,
+  getWorkPlacesFromServices,
+  mergeWorkplaces,
+  parseSeries,
+} from "./functions";
 import {
   getNodeControlEndpointAsync,
   getTimeSeriesAsync,
   getWorkPlaceAttributAsync,
-  getWorkPlacesAsync,
   updateDate,
 } from "./api-request";
 
+async function generateTable1() {
+  console.log("Generating static table");
+  const workplaces = await getWorkPlaces();
+  console.log("\tLoaded from captor group");
+  const serviceWorkplaces = await getWorkPlacesFromServices();
+  console.log("\tLoaded from service group");
+  const areaWorkplaces = await getWorkPlacesFromAreas();
+  console.log("\tLoaded from area group");
+  const to_download = mergeWorkplaces(
+    mergeWorkplaces(workplaces, areaWorkplaces),
+    serviceWorkplaces
+  );
+  downloadCSV(config.table.static, to_download);
+}
+
 async function generateTable2() {
-  const workplaces = await getWorkPlacesAsync();
+  console.log("Generating dynamic table");
+  let nbErr = 0;
+  const workplaces = await getWorkPlaces();
   const table = await Promise.all(
     workplaces.map(async (workplace: any) => {
       try {
-        const attr = await getWorkPlaceAttributAsync(workplace.dynamicId);
+        const attr = (await getWorkPlaceAttributAsync(workplace.dynamicId))
+          .find((a: any) => a.name === config.attribute.category)
+          .attributs.find((a: any) => a.label === config.attribute.name);
         const cp = await getNodeControlEndpointAsync(workplace.dynamicId);
         const ts = await getTimeSeriesAsync(cp.dynamicId);
-        console.log("\tTIME SERIES LOADED ON WORKPLACE:", workplace.name);
-        const table = parseSeries(workplace.staticId, attr.attributs.value, ts);
-        console.log("\tDONE ON WORKPLACE:", workplace.name, "\n");
+        const table = parseSeries(workplace.staticId, attr.value, ts);
         return table;
       } catch (e) {
-        console.log("\tFAILED TO LOAD ON WORKPLACE:", workplace.name, "\n");
+        nbErr++;
         return [
           {
             "SpinalNode Id": workplace.staticId,
@@ -34,10 +58,16 @@ async function generateTable2() {
     })
   );
 
-  downloadCSV(table.reduce((e1, e2) => [...e1, ...e2], []));
+  downloadCSV(
+    config.table.dynamic,
+    table.reduce((e1, e2) => [...e1, ...e2], [])
+  );
+  console.log(nbErr, "errors");
 }
 
 async function Main() {
+  await generateTable1();
+
   cron.schedule("0 1 * * *", () => {
     updateDate();
     generateTable2();

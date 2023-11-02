@@ -26,11 +26,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
 dotenv.config();
 exports.default = {
+    table: {
+        static: process.env.PREFIX_TABLE_1,
+        dynamic: process.env.PREFIX_TABLE_2,
+    },
     position: {
         context: process.env.CONTEXT_NAME_POSITION_TRAVAIL,
         category: process.env.CATEGORY_NAME_POSITION_TRAVAIL,
         group: process.env.GROUP_NAME_POSITION_TRAVAIL,
         equipement: process.env.EQUIPEMENT_NAME_POSITION_TRAVAIL,
+    },
+    service: {
+        context: process.env.CONTEXT_NAME_SERVICE,
+    },
+    quartier: {
+        context: process.env.CONTEXT_NAME_QUARTIER,
+        category: process.env.CATEGORY_NAME_QUARTIER,
     },
     attribute: {
         category: process.env.CATEGORY_ATTRIBUTE_NAME,
