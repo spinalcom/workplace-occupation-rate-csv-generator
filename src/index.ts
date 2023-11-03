@@ -85,10 +85,10 @@ async function generateTable2() {
 async function Main() {
   await generateTable1();
 
-  cron.schedule("0 1 * * *", () => {
-    updateDate();
-    generateTable2();
-  });
+  //cron.schedule("0 1 * * *", () => {
+  updateDate();
+  generateTable2();
+  //});
 }
 
 Main();

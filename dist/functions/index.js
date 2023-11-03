@@ -64,18 +64,15 @@ function parseSeries(workplaceId, series, workplaceCode) {
         .map((date) => durations.filter((d) => moment(d.date).isSame(date, "hour")))
         .map((e) => {
         let quot = 0;
-        return Math.round((e.reduce((e1, e2) => {
-            quot += e2.duration;
-            return e1 + e2.duration * e2.value;
-        }, 0) /
-            quot) *
-            100);
+        return e.length
+            ? Math.round((e.reduce((e1, e2) => {
+                quot += e2.duration;
+                return e1 + e2.duration * e2.value;
+            }, 0) /
+                quot) *
+                100)
+            : 0;
     });
-    console.log(durations.map((e) => ({
-        date: moment(e.date).format("HH[h]mm"),
-        duree: moment(e.duration).format("mm[min]"),
-        valeur: e.value,
-    })));
     return dates.map((date, i) => ({
         "SpinalNode Id": workplaceId,
         "ID position de travail": workplaceCode,

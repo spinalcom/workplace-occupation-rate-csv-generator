@@ -6,7 +6,4 @@ export declare function getEquipementWorplacesAsync(contextId: number, categoryI
 export declare function getPositionAsync(equipementId: number): Promise<any>;
 export declare function getWorkPlaceAttributAsync(workplaceId: number): Promise<any>;
 export declare function getNodeControlEndpointAsync(nodeId: number): Promise<any>;
-export declare function getTimeSeriesAsync(endpointId: number): Promise<{
-    date: number;
-    value: number;
-}[]>;
+export declare function getTimeSeriesAsync(endpointId: number): Promise<any>;

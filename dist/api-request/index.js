@@ -95,35 +95,7 @@ exports.getNodeControlEndpointAsync = getNodeControlEndpointAsync;
 function getTimeSeriesAsync(endpointId) {
     return __awaiter(this, void 0, void 0, function* () {
         const begin = moment(today).subtract(1, "day");
-        const result = {
-            data: [
-                { date: 1698904801219, value: 0 },
-                { date: 1698913983166, value: 1 },
-                { date: 1698917641742, value: 1 },
-                { date: 1698921693120, value: 1 },
-                { date: 1698923641999, value: 0 },
-                { date: 1698924005499, value: 0 },
-                { date: 1698928141091, value: 0 },
-                { date: 1698930229651, value: 1 },
-                { date: 1698933004342, value: 0 },
-                { date: 1698933345170, value: 1 },
-                { date: 1698933959891, value: 0 },
-                { date: 1698934174209, value: 1 },
-                { date: 1698935161320, value: 0 },
-                { date: 1698935440587, value: 1 },
-                { date: 1698937070018, value: 1 },
-                { date: 1698939480437, value: 0 },
-                { date: 1698939516716, value: 1 },
-                { date: 1698940320318, value: 0 },
-                { date: 1698940469635, value: 1 },
-                { date: 1698942300788, value: 0 },
-                { date: 1698965722239, value: 0 },
-            ],
-        }; /*await HTTP.get(
-          `/endpoint/${endpointId}/timeSeries/read/${begin.format(
-            "DD-MM-YYYY HH:mm:ss"
-          )}/${today.format("DD-MM-YYYY HH:mm:ss")}`
-        );*/
+        const result = yield http_config_1.HTTP.get(`/endpoint/${endpointId}/timeSeries/read/${begin.format("DD-MM-YYYY HH:mm:ss")}/${today.format("DD-MM-YYYY HH:mm:ss")}`);
         return result.data;
     });
 }
