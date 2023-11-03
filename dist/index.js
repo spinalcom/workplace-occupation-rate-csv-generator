@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const cron = require("node-cron");
 const config_1 = require("./config");
 const functions_1 = require("./functions");
 const api_request_1 = require("./api-request");
@@ -78,10 +77,10 @@ function generateTable2() {
 function Main() {
     return __awaiter(this, void 0, void 0, function* () {
         yield generateTable1();
-        cron.schedule("0 1 * * *", () => {
-            (0, api_request_1.updateDate)();
-            generateTable2();
-        });
+        //cron.schedule("0 1 * * *", () => {
+        (0, api_request_1.updateDate)();
+        generateTable2();
+        //});
     });
 }
 Main();

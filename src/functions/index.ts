@@ -42,27 +42,32 @@ export function parseSeries(
   const hier = moment(new Date().setHours(0, 0, 0, 0)).subtract(1, "day");
   const dates = Array(24)
     .fill(0)
-    .map((e, i) => moment(hier).valueOf());
+    .map((e, i) => moment(hier).add(i, "hours").valueOf());
 
-  const values = dates
-    .map((date) => series.filter((s) => moment(s.date).isSame(date, "hour")))
-    .map((val, i, array) =>
-      val.length
-        ? [{ date: dates[i], value: (val[0].value + 1) % 2 }, ...val].map(
-            (e, i, a) => ({
-              duration:
-                (a[i + 1]?.date || new Date(e.date).setMinutes(59, 59, 59)) -
-                e.date,
-              value: e.value,
-            })
-          )
-        : [
-            {
-              duration: 1,
-              value: array[i - 1]?.[array[i - 1].length - 1]?.value || 0,
-            },
-          ]
-    )
+  series.unshift({ date: dates[0], value: 0 });
+
+  dates.forEach((date) => {
+    const index = series.findIndex((t) => t.date >= date);
+    if (index != -1 && series[index].date !== date)
+      series.splice(index, 0, { date, value: series[index - 1].value });
+  });
+
+  const durations = series.map((el, ind, arr) =>
+    ind < arr.length - 1
+      ? {
+          date: el.date,
+          duration: arr[ind + 1].date - el.date,
+          value: el.value,
+        }
+      : {
+          date: el.date,
+          duration: new Date(el.date).setMinutes(59, 59, 59) - el.date,
+          value: el.value,
+        }
+  );
+
+  const rates = dates
+    .map((date) => durations.filter((d) => moment(d.date).isSame(date, "hour")))
     .map((e) => {
       let quot = 0;
       return Math.round(
@@ -79,7 +84,7 @@ export function parseSeries(
     "SpinalNode Id": workplaceId,
     "ID position de travail": workplaceCode,
     Timestamp: date,
-    valeur: values[i],
+    valeur: rates[i],
   }));
 }
 

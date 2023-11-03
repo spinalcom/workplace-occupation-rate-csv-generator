@@ -42,27 +42,26 @@ function parseSeries(workplaceId, series, workplaceCode) {
     const hier = moment(new Date().setHours(0, 0, 0, 0)).subtract(1, "day");
     const dates = Array(24)
         .fill(0)
-        .map((e, i) => moment(hier).valueOf());
-    const values = dates
-        .map((date) => series.filter((s) => moment(s.date).isSame(date, "hour")))
-        .map((val, i, array) => {
-        var _a, _b;
-        return val.length
-            ? [{ date: dates[i], value: (val[0].value + 1) % 2 }, ...val].map((e, i, a) => {
-                var _a;
-                return ({
-                    duration: (((_a = a[i + 1]) === null || _a === void 0 ? void 0 : _a.date) || new Date(e.date).setMinutes(59, 59, 59)) -
-                        e.date,
-                    value: e.value,
-                });
-            })
-            : [
-                {
-                    duration: 1,
-                    value: ((_b = (_a = array[i - 1]) === null || _a === void 0 ? void 0 : _a[array[i - 1].length - 1]) === null || _b === void 0 ? void 0 : _b.value) || 0,
-                },
-            ];
-    })
+        .map((e, i) => moment(hier).add(i, "hours").valueOf());
+    series.unshift({ date: dates[0], value: 0 });
+    dates.forEach((date) => {
+        const index = series.findIndex((t) => t.date >= date);
+        if (index != -1 && series[index].date !== date)
+            series.splice(index, 0, { date, value: series[index - 1].value });
+    });
+    const durations = series.map((el, ind, arr) => ind < arr.length - 1
+        ? {
+            date: el.date,
+            duration: arr[ind + 1].date - el.date,
+            value: el.value,
+        }
+        : {
+            date: el.date,
+            duration: new Date(el.date).setMinutes(59, 59, 59) - el.date,
+            value: el.value,
+        });
+    const rates = dates
+        .map((date) => durations.filter((d) => moment(d.date).isSame(date, "hour")))
         .map((e) => {
         let quot = 0;
         return Math.round((e.reduce((e1, e2) => {
@@ -72,11 +71,16 @@ function parseSeries(workplaceId, series, workplaceCode) {
             quot) *
             100);
     });
+    console.log(durations.map((e) => ({
+        date: moment(e.date).format("HH[h]mm"),
+        duree: moment(e.duration).format("mm[min]"),
+        valeur: e.value,
+    })));
     return dates.map((date, i) => ({
         "SpinalNode Id": workplaceId,
         "ID position de travail": workplaceCode,
         Timestamp: date,
-        valeur: values[i],
+        valeur: rates[i],
     }));
 }
 exports.parseSeries = parseSeries;
